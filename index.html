@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Task Vector Quantization for Memory-Efficient Model Merging.">
+  <meta name="keywords" content="KEYWORDS SHOULD BE PLACED HERE">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task Vector Quantization for Memory-Efficient Model Merging</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+    <style>
+      .carousel { overflow: hidden; }
+      .carousel-item { min-width: 100% !important; }
+    </style>  
+  <link rel="icon" type="image/x-icon" href="./static/images/logo.png">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">Task Vector Quantization for Memory-Efficient Model Merging</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://youngryan1993.github.io/homepage/" target="_blank">Youngeun Kim</a><sup>1*</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://aim.skku.edu/member" target="_blank">Seunghwan Lee</a><sup>2*</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://sites.google.com/view/kasurashan" target="_blank">Aecheon Jung</a><sup>2*</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://aim.skku.edu/member" target="_blank">Bogon Ryu</a><sup>2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://www.csehong.com/" target="_blank">Sungeun Hong</a><sup>2†</sup>,
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>Yale University,</span>
+            <span class="author-block"><sup>2</sup>Sungkyunkwan University</span>
+            <span class="conference-block"><br>ICCV 2025</span>
+            <span class="eql-cntrb"><small><br><sup>*</sup>Indicates Equal Contribution</small></span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="https://arxiv.org/pdf/2503.06921"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <!-- Github link -->
+              <span class="link-block">
+              <a href="https://github.com/AIM-SKKU/TVQ" target="_blank"
+              class="external-link button is-normal is-rounded is-dark">
+              <span class="icon">
+                <i class="fab fa-github"></i>
+              </span>
+              <span>Code</span>
+              </a>
+            </span>
+            <!-- Checkpoint link -->
+            <span class="link-block">
+              <a href="https://aim-skku.github.io/TVQ/"  
+                class="external-link button is-normal is-rounded is-dark" target="_blank">
+                <span class="icon"><i class="fas fa-cube"></i></span>
+                <span>Checkpoint</span>
+              </a>
+            </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Concept Figure Section -->
+<section class="section py-1">
+  <div class="container is-max-desktop has-text-centered">
+    <img src="./static/images/main_method.jpg" alt="Concept figure" style="max-width:1000px; width: 100%;" />
+  </div>
+</section>
+
+
+<section class="section py-3">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Model merging enables efficient multi-task models by combining task-specific fine-tuned checkpoints. 
+            However, storing multiple task-specific checkpoints requires significant memory, limiting scalability 
+            and restricting model merging to larger models and diverse tasks. In this paper, we propose quantizing 
+            task vectors (i.e., the difference between pre-trained and fine-tuned checkpoints) instead of quantizing
+            fine-tuned checkpoints. We observe that task vectors exhibit a narrow weight range, enabling low precision
+            quantization (up to 4 bit) within existing task vector merging frameworks. To further mitigate quantization
+            errors within ultra-low bit precision (e.g., 2 bit), we introduce Residual Task Vector Quantization, which
+            decomposes the task vector into a base vector and offset component. We allocate bits based on quantization
+            sensitivity, ensuring precision while minimizing error within a memory budget. Experiments on image 
+            classification and dense prediction show our method maintains or improves model merging performance while
+            using only 8% of the memory required for full-precision checkpoints.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+  </div>
+</section>
+
+
+<section class="section" id="motivation">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 mb-5">Motivation</h2>
+
+    <!-- <div class="has-text-centered mb-5">
+      <img src="./static/images/concept_figure.jpg"
+           alt="Concept figure"
+           style="max-width:1000px; width:55%; height:auto;">
+    </div> -->
+
+      <!-- Storage-Cost -->
+      <div class="table-container
+           is-flex
+           is-justify-content-center"
+           style="overflow-x:auto;">
+        <table class="table is-bordered is-striped is-hoverable"
+              style="width:80%; min-width:650px;">
+          <thead>
+            <tr>
+              <th rowspan="2" style="text-align:center; vertical-align:middle;"># Tasks</th>
+              <th style="text-align:center;">Baseline</th>
+              <th colspan="3" style="text-align:center;">
+                TVQ&nbsp;(ours)
+              </th>
+              <th style="text-align:center;">RTVQ&nbsp;(ours)</th>
+            </tr>
+            <tr>
+              <th style="text-align:center;">FP32</th>
+              <th style="text-align:center;">INT8</th>
+              <th style="text-align:center;">INT4</th>
+              <th style="text-align:center;">INT2</th>
+              <th style="text-align:center;">B3O2</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align:center;">8</td>
+              <td style="text-align:center;">9.1&nbsp;GB</td>
+              <td style="text-align:center;">2.3&nbsp;GB</td>
+              <td style="text-align:center;">1.1&nbsp;GB</td>
+              <td style="text-align:center;">0.6&nbsp;GB</td>
+              <td style="text-align:center;">0.7&nbsp;GB</td>
+            </tr>
+            <tr>
+              <td style="text-align:center;">14</td>
+              <td style="text-align:center;">16.0&nbsp;GB</td>
+              <td style="text-align:center;">4.0&nbsp;GB</td>
+              <td style="text-align:center;">2.0&nbsp;GB</td>
+              <td style="text-align:center;">1.0&nbsp;GB</td>
+              <td style="text-align:center;">1.2&nbsp;GB</td>
+            </tr>
+            <tr>
+              <td style="text-align:center;">20</td>
+              <td style="text-align:center;">22.8&nbsp;GB</td>
+              <td style="text-align:center;">5.7&nbsp;GB</td>
+              <td style="text-align:center;">2.9&nbsp;GB</td>
+              <td style="text-align:center;">1.4&nbsp;GB</td>
+              <td style="text-align:center;">1.7&nbsp;GB</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+
+    <p class="mt-2">
+      Model merging aims to combine multiple well-trained models into a single set of parameters. 
+      However, storing the checkpoints required to combine these models entails significant memory overhead. 
+      For instance, a ViT-L/14 model needs 1.14 GB per fine-tuned checkpoint, totaling 22.8 GB for 20 tasks. 
+      In resource-constrained environments like an edge device, such high memory demands for checkpoints hinder scaling to larger models and more tasks.
+      Our approach overcomes this limitation, achieving up to a 13x reduction in storage costs while maintaining the original model performance.
+    </p>
+
+  </div>
+</section>
+
+<section class="section py-3" id="tl;dr">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 mb-5">TL;DR takeaways</h2>
+    <div class="carousel carousel-animated carousel-animate-slide"
+         data-loop="true" data-autoplay="false">
+
+      <!-- ── slide #1 ── -->
+      <div class="carousel-item is-active">
+          <img src="./static/images/weightdist_for_Qerr.jpg"
+               alt="Weight distribution for Q error – full model"
+               style="max-width:100%; height:auto;">
+      </div>
+
+      <!-- ── slide #2 ── -->
+      <div class="carousel-item">
+          <img src="./static/images/weightdist_for_Qerr_segm.jpg"
+               alt="Weight distribution for Q error – segmentation layers"
+               style="max-width:100%; height:auto;">
+      </div>
+
+      <!-- ── slide #3 ── -->
+      <div class="carousel-item 
+                  is-flex
+                  is-justify-content-center
+                  is-align-items-center">
+          <img src="./static/images/quant_err.jpg"
+                alt="Quantization error"
+               style="width:65%; height:auto;">
+      </div>
+
+      <!-- ── slide #4 ── -->
+      <div class="carousel-item 
+                  is-flex
+                  is-justify-content-center
+                  is-align-items-center">
+          <img src="./static/images/perf_overview.jpg"
+                alt="Performance overview"
+               style="width:80%; height:auto;">
+      </div>
+      
+    </div>
+
+    <ul class="mt-2" style="list-style:disc outside; margin-left:1.2em;">
+      <li>
+      We observe that task vectors (i.e., the difference between fine-tuned and pretrained checkpoints) 
+      exhibit a weight range that is an order of magnitude narrower than that of fine-tuned weights.
+      Since the upper bound of quantization is determined by the range of weight value, quantizing task vectors results in a smaller quantization error compared to quantizing full fine-tuned checkpoints.
+      </li>
+    </ul>
+
+    <ul class="mt-2" style="list-style:disc outside; margin-left:1.2em;">
+      <li>
+       Based on this observation, we propose to quantize task vectors rather than the entire set of fine-tuned weights, which enables effective low-bit precision quantization (e.g., 4-bit).
+      </li>
+    </ul>
+
+    <ul class="mt-2" style="list-style:disc outside; margin-left:1.2em;">
+      <li>
+        To further reduce quantization error in extremely low bit precision, we introduce Residual Task Vector Quantization (RTVQ).
+        The key idea is to decompose the multiple task vectors into a shared base vector and a several offset vectors.
+        By assigning higher precision to the base vector and lower precision to the offset vectors, it reduces quantization error while keeping memory overhead minimal, as only one base vector is shared across all tasks.
+      </li>
+    </ul>
+
+    <ul class="mt-2" style="list-style:disc outside; margin-left:1.2em;">
+      <li>
+        A key advantage of our approach is that it operates soley on the checkpoints.
+        As a result, our quantization method can be seamlessly integrated into existing model merging frameworks without any modifications.
+        Extensive experiments on image classification and dense vision tasks validate its effectiveness.
+      </li>
+    </ul>    
+
+
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof bulmaCarousel !== 'undefined') {
+      bulmaCarousel.attach('.carousel', {
+        slidesToScroll : 1,
+        slidesToShow   : 1,
+        loop           : true,
+        autoplay       : false,   
+        autoplaySpeed  : 5000     
+      });
+    }
+  });
+</script>
+
+<style>
+  .carousel      { overflow: hidden; }
+  .carousel-item { min-width: 100% !important; }
+</style>
+
+
+<section class="section" id="experiments">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 mb-5">Experimental Results</h2>
+    <p class="mb-5">
+    To assess the impact of quantization on model merging, we first quantize fine-tuned checkpoints (FQ), task vectors (TVQ), and residual task vectors (RTVQ), then apply these weights to various merging methods.   
+    We compare all methods with their full-precision (FP32) counterparts across multiple tasks. 
+    Our goal is not to maximize absolute performance but to show that even with highly compact quantization, the model remains effective across multiple tasks.
+    </p>
+
+    <h3 class="title is-4 mb-5">
+      Merging 8 Classification Tasks
+    </h3>
+
+
+    <div class="carousel carousel-animated carousel-animate-slide" data-loop="true" data-autoplay="true" data-autoplay-speed="5000">
+      <!-- ───── slide #1 ───── -->
+      <div class="carousel-item is-active">
+      <h3 class="title is-5 has-text-centered mb-3">ViT-L/14</h3>
+        <div class="table-container">
+          <table class="table is-bordered is-fullwidth is-striped is-hoverable">
+            <!-- vit-l/14 -->
+            <thead>
+            <tr>
+              <th rowspan="2" style="text-align:center; vertical-align:middle;">Method</th>
+              <th colspan="1" style="text-align:center; vertical-align:middle;">Baseline</th>
+              <th colspan="2" style="text-align:center;">FQ</th>
+              <th colspan="4" style="text-align:center;">TVQ (ours)</th>
+              <th rowspan="2" style="text-align:center; vertical-align:middle;">RTVQ (ours)</th>
+            </tr>
+            <tr>
+              <th style="text-align:center;">FP32</th>
+              <th style="text-align:center;">INT8</th>
+              <th style="text-align:center;">INT4</th>
+              <th style="text-align:center;">INT8</th>
+              <th style="text-align:center;">INT4</th>
+              <th style="text-align:center;">INT3</th>
+              <th style="text-align:center;">INT2</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align: center;">Individual</td>
+              <td style="text-align: center;">94.2</td>
+              <td>94.2 <span style="color:green;">(0.0)</span></td>
+              <td>4.3 <span style="color:red;">(-89.9)</span></td>
+              <td>94.1 <span style="color:red;">(-0.1)</span></td>
+              <td>94.2 <span style="color:green;">(0.0)</span></td>
+              <td>94.2 <span style="color:green;">(0.0)</span></td>
+              <td>90.9 <span style="color:red;">(-3.3)</span></td>
+              <td style="text-align:center;">–</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">Task arithmetic</td>
+              <td style="text-align: center;">84.3</td>
+              <td>84.1 <span style="color:red;">(-0.2)</span></td>
+              <td>4.5 <span style="color:red;">(-79.8)</span></td>
+              <td>84.3 <span style="color:green;">(0.0)</span></td>
+              <td>84.4 <span style="color:green;">(0.1)</span></td>
+              <td>84.8 <span style="color:green;">(0.5)</span></td>
+              <td>77.9 <span style="color:red;">(-6.4)</span></td>
+              <td>84.8 <span style="color:green;">(0.5)</span></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">Ties merging</td>
+              <td style="text-align: center;">84.5</td>
+              <td>78.3 <span style="color:red;">(-6.2)</span></td>
+              <td>4.2 <span style="color:red;">(-80.3)</span></td>
+              <td>84.5 <span style="color:green;">(0.0)</span></td>
+              <td>84.6 <span style="color:green;">(0.1)</span></td>
+              <td>85.3 <span style="color:green;">(0.8)</span></td>
+              <td>78.0 <span style="color:red;">(-6.5)</span></td>
+              <td>81.6 <span style="color:red;">(-2.9)</span></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">LiNeS</td>
+              <td style="text-align: center;">86.9</td>
+              <td>86.4 <span style="color:red;">(-0.5)</span></td>
+              <td>5.4 <span style="color:red;">(-81.5)</span></td>
+              <td>86.9 <span style="color:green;">(0.0)</span></td>
+              <td>86.9 <span style="color:green;">(0.0)</span></td>
+              <td>87.7 <span style="color:green;">(0.8)</span></td>
+              <td>81.8 <span style="color:red;">(-5.1)</span></td>
+              <td>87.7 <span style="color:green;">(0.8)</span></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">Consensus TA</td>
+              <td style="text-align: center;">86.6</td>
+              <td>84.6 <span style="color:red;">(-2.0)</span></td>
+              <td>4.2 <span style="color:red;">(-82.4)</span></td>
+              <td>86.6 <span style="color:green;">(0.0)</span></td>
+              <td>86.6 <span style="color:green;">(0.0)</span></td>
+              <td>87.1 <span style="color:green;">(0.5)</span></td>
+              <td>79.0 <span style="color:red;">(-7.6)</span></td>
+              <td>87.3 <span style="color:green;">(0.7)</span></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">AdaMerging</td>
+              <td style="text-align: center;">90.8</td>
+              <td>90.8 <span style="color:green;">(0.0)</span></td>
+              <td>4.8 <span style="color:red;">(-86.0)</span></td>
+              <td>90.9 <span style="color:green;">(0.1)</span></td>
+              <td>90.9 <span style="color:green;">(0.1)</span></td>
+              <td>91.0 <span style="color:green;">(0.2)</span></td>
+              <td>89.4 <span style="color:red;">(-1.4)</span></td>
+              <td>90.9 <span style="color:green;">(0.1)</span></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">EMR-Merging</td>
+              <td style="text-align: center;">93.5</td>
+              <td>92.8 <span style="color:red;">(-0.7)</span></td>
+              <td>4.4 <span style="color:red;">(-89.1)</span></td>
+              <td>93.5 <span style="color:green;">(0.0)</span></td>
+              <td>93.9 <span style="color:green;">(0.4)</span></td>
+              <td>93.9 <span style="color:green;">(0.4)</span></td>
+              <td>87.6 <span style="color:red;">(-5.9)</span></td>
+              <td>90.3 <span style="color:red;">(-3.2)</span></td>
+            </tr>
+          </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ───────────────  slide #2  ─────────────── -->
+      <div class="carousel-item">
+      <h3 class="title is-5 has-text-centered mb-3">ViT-B/32</h3>
+        <div class="table-container">
+          <table class="table is-bordered is-fullwidth is-striped is-hoverable">
+            <!-- vit-b/32 -->
+            <thead>
+            <tr>
+              <th rowspan="2" style="text-align:center; vertical-align:middle;">Method</th>
+              <th colspan="1" style="text-align:center; vertical-align:middle;">Baseline</th>
+              <th colspan="2" style="text-align:center;">FQ</th>
+              <th colspan="4" style="text-align:center;">TVQ (ours)</th>
+              <th rowspan="2" style="text-align:center; vertical-align:middle;">RTVQ (ours)</th>
+            </tr>
+            <tr>
+              <th style="text-align:center;">FP32</th>
+              <th style="text-align:center;">INT8</th>
+              <th style="text-align:center;">INT4</th>
+              <th style="text-align:center;">INT8</th>
+              <th style="text-align:center;">INT4</th>
+              <th style="text-align:center;">INT3</th>
+              <th style="text-align:center;">INT2</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align: center;">Individual</td>
+              <td style="text-align:center;">90.5</td>
+              <td>90.4 <span style="color:red;">(-0.1)</span></td>
+              <td>4.2 <span style="color:red;">(-86.3)</span></td>
+              <td>90.5 <span style="color:green;">(0.0)</span></td>
+              <td>90.5 <span style="color:green;">(0.0)</span></td>
+              <td>90.7 <span style="color:green;">(0.2)</span></td>
+              <td>83.5 <span style="color:red;">(-7.0)</span></td>
+              <td style="text-align:center;">–</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">Task arithmetic</td>
+              <td style="text-align:center;">69.2</td>
+              <td>68.1 <span style="color:red;">(-1.1)</span></td>
+              <td>4.2 <span style="color:red;">(-65.0)</span></td>
+              <td>69.0 <span style="color:red;">(-0.2)</span></td>
+              <td>69.1 <span style="color:red;">(-0.1)</span></td>
+              <td>71.2 <span style="color:green;">(2.0)</span></td>
+              <td>62.1 <span style="color:red;">(-7.1)</span></td>
+              <td>70.2 <span style="color:green;">(1.0)</span></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">Ties merging</td>
+              <td style="text-align:center;">72.9</td>
+              <td>64.8 <span style="color:red;">(-8.1)</span></td>
+              <td>4.2 <span style="color:red;">(-68.7)</span></td>
+              <td>72.7 <span style="color:red;">(-0.2)</span></td>
+              <td>72.0 <span style="color:red;">(-0.9)</span></td>
+              <td>73.6 <span style="color:green;">(0.7)</span></td>
+              <td>62.6 <span style="color:red;">(-10.3)</span></td>
+              <td>72.7 <span style="color:red;">(-0.2)</span></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">LiNeS</td>
+              <td style="text-align:center;">74.1</td>
+              <td>73.9 <span style="color:red;">(-0.2)</span></td>
+              <td>4.3 <span style="color:red;">(-69.8)</span></td>
+              <td>74.2 <span style="color:green;">(0.1)</span></td>
+              <td>74.2 <span style="color:green;">(0.1)</span></td>
+              <td>74.7 <span style="color:green;">(0.6)</span></td>
+              <td>60.7 <span style="color:red;">(-13.4)</span></td>
+              <td>74.2 <span style="color:green;">(0.1)</span></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">Consensus TA</td>
+              <td style="text-align:center;">74.9</td>
+              <td>70.6 <span style="color:red;">(-4.3)</span></td>
+              <td>3.7 <span style="color:red;">(-71.2)</span></td>
+              <td>74.9 <span style="color:green;">(0.0)</span></td>
+              <td>74.9 <span style="color:green;">(0.0)</span></td>
+              <td>74.8 <span style="color:red;">(-0.1)</span></td>
+              <td>58.5 <span style="color:red;">(-16.4)</span></td>
+              <td>72.7 <span style="color:red;">(-2.2)</span></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">AdaMerging</td>
+              <td style="text-align:center;">81.8</td>
+              <td>81.6 <span style="color:red;">(-0.2)</span></td>
+              <td>4.5 <span style="color:red;">(-77.3)</span></td>
+              <td>81.6 <span style="color:red;">(-0.2)</span></td>
+              <td>81.5 <span style="color:red;">(-0.3)</span></td>
+              <td>82.0 <span style="color:green;">(0.2)</span></td>
+              <td>78.1 <span style="color:red;">(-3.7)</span></td>
+              <td>82.8 <span style="color:green;">(1.0)</span></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">EMR-Merging</td>
+              <td style="text-align:center;">88.3</td>
+              <td>88.7 <span style="color:green;">(0.4)</span></td>
+              <td>3.9 <span style="color:red;">(-84.4)</span></td>
+              <td>88.4 <span style="color:green;">(0.1)</span></td>
+              <td>89.8 <span style="color:green;">(1.5)</span></td>
+              <td>90.0 <span style="color:green;">(1.7)</span></td>
+              <td>77.2 <span style="color:red;">(-11.1)</span></td>
+              <td>83.2 <span style="color:red;">(-5.1)</span></td>
+            </tr>
+          </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <p class="mt-5 mb-5">
+      Directly quantizing fine-tuned checkpoints maintains acceptable performance at 8-bit precision but suffers a significant drop in accuracy at 4-bits.
+      In contrast, TVQ show much better stability. 
+      Even at 4-bit and 3-bit precision, model accuracy stays close to FP32.
+      However, at 2-bit, performance drops sharply, indicating that excessive compression introduces substantial quantization noise. 
+      RTVQ overcomes these limitations with a robust approach. 
+      It decomposes each task vector into a shared base vector (3 bits) and a residual vector (2 bits), requiring about 2.375 bits per task. 
+      This vector decomposition reduces the performance drop seen in 2-bit TVQ while preserving most of the accuracy benefits of higher-bit quantization.
+    </p>    
+
+
+    <h3 class="title is-4 mb-5 mt-5">Merging 14 and 20 Classification Tasks</h3>
+
+    <div class="has-text-centered">
+      <img src="./static/images/scaling_vision_tasks.jpg"
+           alt="Scaling to 14 and 20 classification tasks"
+           style="max-width:60%; height:auto;">
+    </div>
+
+    <p class="mt-2">
+      With 14 and 20 tasks, storing full-precision fine-tuned checkpoints becomes more impractical and highlights the need for effective quantization. 
+
+      Note that, as the base vector is globally shared among tasks, 
+      RTVQ scales favorably by effectively reducing the per-task bit requirement as task numbers increase.
+    </p>
+
+    <h3 class="title is-4 mb-5 mt-5">Merging Dense Prediction Tasks</h3>
+    <div style="overflow-x:auto;">
+      <table class="table is-bordered is-striped is-hoverable" style="min-width:1300px;">
+        <thead>
+          <tr>
+            <th rowspan="2" style="text-align:center; vertical-align:middle;">Method</th>
+            <th colspan="4" style="text-align:center;">Segmentation&nbsp;↑</th>
+            <th colspan="4" style="text-align:center;">Depth&nbsp;Est.&nbsp;↓</th>
+            <th colspan="4" style="text-align:center;">Normal&nbsp;Est.&nbsp;↓</th>
+          </tr>
+          <tr>
+            <!-- Seg -->
+            <th style="text-align:center;">FP32</th>
+            <th style="text-align:center;">TVQ-INT4</th>
+            <th style="text-align:center;">TVQ-INT2</th>
+            <th style="text-align:center;">RTVQ</th>
+            <!-- Depth -->
+            <th style="text-align:center;">FP32</th>
+            <th style="text-align:center;">TVQ-INT4</th>
+            <th style="text-align:center;">TVQ-INT2</th>
+            <th style="text-align:center;">RTVQ</th>
+            <!-- Normal -->
+            <th style="text-align:center;">FP32</th>
+            <th style="text-align:center;">TVQ-INT4</th>
+            <th style="text-align:center;">TVQ-INT2</th>
+            <th style="text-align:center;">RTVQ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Individual -->
+          <tr>
+            <td style="text-align:center;">Individual</td>
+            <td style="text-align:center;">52.0</td>
+            <td>52.0 <span style="color:green;">(0.0)</span></td>
+            <td>37.7 <span style="color:red;">(-14.3)</span></td>
+            <td style="text-align:center;">–</td>
+            <td style="text-align:center;">41.5</td>
+            <td>41.4 <span style="color:green;">(-0.1)</span></td>
+            <td>62.5 <span style="color:red;">(+21.0)</span></td>
+            <td style="text-align:center;">–</td>
+            <td style="text-align:center;">24.2</td>
+            <td>24.2 <span style="color:green;">(0.0)</span></td>
+            <td>34.2 <span style="color:red;">(+10.0)</span></td>
+            <td style="text-align:center;">–</td>
+          </tr>
+
+          <!-- Task arithmetic -->
+          <tr>
+            <td style="text-align:center;">Task&nbsp;arithmetic</td>
+            <td style="text-align:center;">31.6</td>
+            <td>31.5 <span style="color:red;">(-0.1)</span></td>
+            <td>36.4 <span style="color:green;">(+4.8)</span></td>
+            <td>36.1 <span style="color:green;">(+4.5)</span></td>
+            <td style="text-align:center;">24.0</td>
+            <td>24.0 <span style="color:green;">(0.0)</span></td>
+            <td>26.2 <span style="color:red;">(+2.2)</span></td>
+            <td>24.6 <span style="color:red;">(+0.6)</span></td>
+            <td style="text-align:center;">30.6</td>
+            <td>30.6 <span style="color:green;">(0.0)</span></td>
+            <td>36.1 <span style="color:red;">(+5.5)</span></td>
+            <td>32.6 <span style="color:red;">(+2.0)</span></td>
+          </tr>
+
+          <!-- Ties merging -->
+          <tr>
+            <td style="text-align:center;">Ties&nbsp;merging</td>
+            <td style="text-align:center;">39.9</td>
+            <td>40.0 <span style="color:green;">(+0.1)</span></td>
+            <td>36.1 <span style="color:red;">(-3.8)</span></td>
+            <td>37.0 <span style="color:red;">(-2.9)</span></td>
+            <td style="text-align:center;">27.3</td>
+            <td>27.2 <span style="color:green;">(-0.1)</span></td>
+            <td>26.5 <span style="color:green;">(-0.8)</span></td>
+            <td>24.6 <span style="color:green;">(-2.7)</span></td>
+            <td style="text-align:center;">36.2</td>
+            <td>36.2 <span style="color:green;">(0.0)</span></td>
+            <td>37.0 <span style="color:red;">(+0.8)</span></td>
+            <td>32.6 <span style="color:green;">(-3.6)</span></td>
+          </tr>
+
+          <!-- MagMax -->
+          <tr>
+            <td style="text-align:center;">MagMax</td>
+            <td style="text-align:center;">24.7</td>
+            <td>25.4 <span style="color:green;">(+0.7)</span></td>
+            <td>29.9 <span style="color:green;">(+5.2)</span></td>
+            <td>29.4 <span style="color:green;">(+4.7)</span></td>
+            <td style="text-align:center;">23.9</td>
+            <td>24.2 <span style="color:red;">(+0.3)</span></td>
+            <td>25.6 <span style="color:red;">(+1.7)</span></td>
+            <td>24.7 <span style="color:red;">(+0.8)</span></td>
+            <td style="text-align:center;">30.3</td>
+            <td>30.0 <span style="color:green;">(-0.3)</span></td>
+            <td>32.2 <span style="color:red;">(+1.9)</span></td>
+            <td>31.1 <span style="color:red;">(+0.8)</span></td>
+          </tr>
+
+          <!-- Breadcrumbs -->
+          <tr>
+            <td style="text-align:center;">Breadcrumbs</td>
+            <td style="text-align:center;">34.1</td>
+            <td>34.3 <span style="color:green;">(+0.2)</span></td>
+            <td>32.2 <span style="color:red;">(-1.9)</span></td>
+            <td>34.0 <span style="color:red;">(-0.1)</span></td>
+            <td style="text-align:center;">27.2</td>
+            <td>27.2 <span style="color:green;">(0.0)</span></td>
+            <td>28.4 <span style="color:red;">(+1.2)</span></td>
+            <td>27.7 <span style="color:red;">(+0.5)</span></td>
+            <td style="text-align:center;">36.9</td>
+            <td>37.0 <span style="color:red;">(+0.1)</span></td>
+            <td>40.6 <span style="color:red;">(+3.7)</span></td>
+            <td>38.3 <span style="color:red;">(+1.4)</span></td>
+          </tr>
+
+          <!-- EMR-Merging -->
+          <tr>
+            <td style="text-align:center;">EMR-Merging</td>
+            <td style="text-align:center;">41.5</td>
+            <td>44.8 <span style="color:green;">(+3.3)</span></td>
+            <td>21.3 <span style="color:red;">(-20.2)</span></td>
+            <td>34.1 <span style="color:red;">(-7.4)</span></td>
+            <td style="text-align:center;">19.4</td>
+            <td>18.8 <span style="color:green;">(-0.6)</span></td>
+            <td>25.5 <span style="color:red;">(+6.1)</span></td>
+            <td>22.1 <span style="color:red;">(+2.7)</span></td>
+            <td style="text-align:center;">26.5</td>
+            <td>26.6 <span style="color:red;">(+0.1)</span></td>
+            <td>45.2 <span style="color:red;">(+18.7)</span></td>
+            <td>35.0 <span style="color:red;">(+8.5)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="title is-4 mb-5 mt-5">Key Observations</h3>
+    <div class="columns is-centered">
+
+      <!-- loss landscape -->
+      <div class="column">
+        <img src="./static/images/loss_landscape.png"
+            alt="Loss-landscape analysis"
+            style="max-width:100%; height:auto;">
+        <p class="mt-2">
+          Quantized task vectors deviate from their original directions in the loss landscape, sometimes shifting toward directions more beneficial for other tasks. 
+        </p>
+      </div>
+
+      <!-- weight distribution -->
+      <div class="column">
+        <img src="./static/images/quantization_effect.jpg"
+            alt="Weight distribution"
+            style="max-width:100%; height:auto;">
+        <p class="mt-2">
+          Our quantization process naturally prunes the task vector’s less impactful parameters by mapping small-magnitude weights to zero, leading to a sparsity of 56.7%.
+        </p>
+      </div>
+
+    </div>
+
+
+
+
+    </div>
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  bulmaCarousel.attach('.carousel', {
+    slidesToScroll : 1,
+    slidesToShow   : 1,
+    loop           : true,
+    autoplay       : true,
+    autoplaySpeed  : 5000   
+  });
+});
+</script>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@article{kim2025task,
+  title={Task vector quantization for memory-efficient model merging},
+  author={Kim, Youngeun and Lee, Seunghwan and Jung, Aecheon and Ryu, Bogon and Hong, Sungeun},
+  journal={arXiv preprint arXiv:2503.06921},
+  year={2025}
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This page was built using the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project Page Template</a> which was adopted from the <a href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
+            You are free to borrow the source code of this website, we just ask that you link back to this page in the footer. <br> This website is licensed under a <a rel="license"  href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

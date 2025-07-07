@@ -86,14 +86,6 @@
               <span>Code</span>
               </a>
             </span>
-            <!-- Checkpoint link -->
-            <span class="link-block">
-              <a href="https://aim-skku.github.io/TVQ/"  
-                class="external-link button is-normal is-rounded is-dark" target="_blank">
-                <span class="icon"><i class="fas fa-cube"></i></span>
-                <span>Checkpoint</span>
-              </a>
-            </span>
             </div>
           </div>
         </div>
@@ -105,10 +97,26 @@
 
 <!-- Concept Figure Section -->
 <section class="section py-1">
-  <div class="container is-max-desktop has-text-centered">
-    <img src="./static/images/main_method.jpg" alt="Concept figure" style="max-width:1000px; width: 100%;" />
+  <div class="container">
+    <div class="columns is-vcentered is-gapless">
+      
+      <div class="column is-one-third p-0">    
+        <img src="./static/images/concept_figure.jpg"
+             alt="Concept figure"
+             style="width:90%; height:auto;">  
+      </div>
+
+      <div class="column is-two-thirds p-0">
+        <img src="./static/images/main_method.jpg"
+             alt="Main method"
+             style="width:100%; height:auto;  margin-top:1.0rem; margin-left:-1.5rem;">
+      </div>
+
+    </div>
   </div>
 </section>
+
+
 
 
 <section class="section py-3">
@@ -124,7 +132,7 @@
             and restricting model merging to larger models and diverse tasks. In this paper, we propose quantizing 
             task vectors (i.e., the difference between pre-trained and fine-tuned checkpoints) instead of quantizing
             fine-tuned checkpoints. We observe that task vectors exhibit a narrow weight range, enabling low precision
-            quantization (up to 4 bit) within existing task vector merging frameworks. To further mitigate quantization
+            quantization (&le; 4 bit) within existing task vector merging frameworks. To further mitigate quantization
             errors within ultra-low bit precision (e.g., 2 bit), we introduce Residual Task Vector Quantization, which
             decomposes the task vector into a base vector and offset component. We allocate bits based on quantization
             sensitivity, ensuring precision while minimizing error within a memory budget. Experiments on image 
@@ -155,7 +163,7 @@
            is-justify-content-center"
            style="overflow-x:auto;">
         <table class="table is-bordered is-striped is-hoverable"
-              style="width:80%; min-width:650px;">
+              style="width:80%; min-width:650px; font-size:0.9rem;">
           <thead>
             <tr>
               <th rowspan="2" style="text-align:center; vertical-align:middle;"># Tasks</th>
@@ -221,17 +229,17 @@
          data-loop="true" data-autoplay="false">
 
       <!-- ── slide #1 ── -->
-      <div class="carousel-item is-active">
+      <div class="carousel-item has-text-centered">
           <img src="./static/images/weightdist_for_Qerr.jpg"
                alt="Weight distribution for Q error – full model"
-               style="max-width:100%; height:auto;">
+               style="max-width:90%; height:auto;">
       </div>
 
       <!-- ── slide #2 ── -->
-      <div class="carousel-item">
+      <div class="carousel-item has-text-centered">
           <img src="./static/images/weightdist_for_Qerr_segm.jpg"
                alt="Weight distribution for Q error – segmentation layers"
-               style="max-width:100%; height:auto;">
+               style="max-width:90%; height:auto;">
       </div>
 
       <!-- ── slide #3 ── -->
@@ -239,9 +247,9 @@
                   is-flex
                   is-justify-content-center
                   is-align-items-center">
-          <img src="./static/images/quant_err.jpg"
+            <img src="./static/images/quant_err.jpg"
                 alt="Quantization error"
-               style="width:65%; height:auto;">
+               style="width:50%; height:auto; margin-top:1.5rem;">
       </div>
 
       <!-- ── slide #4 ── -->
@@ -251,7 +259,7 @@
                   is-align-items-center">
           <img src="./static/images/perf_overview.jpg"
                 alt="Performance overview"
-               style="width:80%; height:auto;">
+               style="width:70%; height:auto;">
       </div>
       
     </div>
@@ -329,7 +337,7 @@
       <div class="carousel-item is-active">
       <h3 class="title is-5 has-text-centered mb-3">ViT-L/14</h3>
         <div class="table-container">
-          <table class="table is-bordered is-fullwidth is-striped is-hoverable">
+          <table class="table is-bordered is-fullwidth is-striped is-hoverable", style="font-size:0.9rem;">
             <!-- vit-l/14 -->
             <thead>
             <tr>
@@ -436,7 +444,7 @@
       <div class="carousel-item">
       <h3 class="title is-5 has-text-centered mb-3">ViT-B/32</h3>
         <div class="table-container">
-          <table class="table is-bordered is-fullwidth is-striped is-hoverable">
+          <table class="table is-bordered is-fullwidth is-striped is-hoverable", style="font-size:0.9rem;">
             <!-- vit-b/32 -->
             <thead>
             <tr>
@@ -556,7 +564,7 @@
     <div class="has-text-centered">
       <img src="./static/images/scaling_vision_tasks.jpg"
            alt="Scaling to 14 and 20 classification tasks"
-           style="max-width:60%; height:auto;">
+           style="max-width:50%; height:auto;">
     </div>
 
     <p class="mt-2">
@@ -568,13 +576,13 @@
 
     <h3 class="title is-4 mb-5 mt-5">Merging Dense Prediction Tasks</h3>
     <div style="overflow-x:auto;">
-      <table class="table is-bordered is-striped is-hoverable" style="min-width:1300px;">
+      <table class="table is-bordered is-striped is-hoverable" style="min-width:1300px; font-size:0.9rem;">
         <thead>
           <tr>
             <th rowspan="2" style="text-align:center; vertical-align:middle;">Method</th>
             <th colspan="4" style="text-align:center;">Segmentation&nbsp;↑</th>
-            <th colspan="4" style="text-align:center;">Depth&nbsp;Est.&nbsp;↓</th>
-            <th colspan="4" style="text-align:center;">Normal&nbsp;Est.&nbsp;↓</th>
+            <th colspan="4" style="text-align:center;">Depth&nbsp;Estimation&nbsp;↓</th>
+            <th colspan="4" style="text-align:center;">Normal&nbsp;Estimation&nbsp;↓</th>
           </tr>
           <tr>
             <!-- Seg -->
